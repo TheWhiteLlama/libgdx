@@ -18,8 +18,12 @@ package com.badlogic.gdx.backends.iosmoe;
 
 import com.badlogic.gdx.ApplicationListener;
 
+import org.moe.natj.general.Pointer;
+import org.moe.natj.objc.ann.Selector;
+
 import apple.coregraphics.struct.CGRect;
 import apple.uikit.UIApplication;
+import apple.uikit.UIViewController;
 
 public class IOSGLKViewApplication extends IOSApplication {
 
@@ -54,4 +58,50 @@ public class IOSGLKViewApplication extends IOSApplication {
 	protected long getStatusBarOrientation () {
 		return UIApplication.sharedApplication().statusBarOrientation();
 	}
+
+    public static abstract class Delegate extends UIViewController {
+
+        private IOSApplication app;
+
+        protected Delegate(Pointer peer) {
+            super(peer);
+        }
+
+        @Selector("alloc")
+        public static native IOSGLKViewApplication.Delegate alloc();
+
+        protected abstract IOSApplication createApplication();
+
+        @Override
+        public void viewDidLoad() {
+            super.viewDidLoad();
+            this.app = createApplication();
+        }
+
+        @Override
+        public void viewWillAppear(boolean animated) {
+            super.viewWillAppear(animated);
+            app.willEnterForeground(null);
+        }
+
+        @Override
+        public void viewDidAppear(boolean animated) {
+            super.viewDidAppear(animated);
+            app.didBecomeActive(null);
+        }
+
+        @Override
+        public void viewWillDisappear(boolean animated) {
+            super.viewWillDisappear(animated);
+            app.willResignActive(null);
+        }
+
+        @Override
+        public void viewDidDisappear(boolean animated) {
+            super.viewDidDisappear(animated);
+            app.willTerminate(null);
+        }
+
+	}
+
 }
